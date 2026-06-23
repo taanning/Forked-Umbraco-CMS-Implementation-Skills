@@ -10,7 +10,7 @@ description: >
 
 Create a custom maintenance page that displays during Umbraco upgrades by adding a `maintenance.cshtml` file to the `UmbracoWebsite` folder at the project root.
 
-**Note:** This page only displays during Umbraco upgrades. It is not a general maintenance mode for scheduled downtime.
+**Note:** This page only displays during Umbraco upgrades. It is not a general maintenance mode for scheduled downtime. As most upgrades can be done without the website having to restart or go down, the maintenance page can be disabled if preferred.
 
 ---
 
@@ -27,44 +27,25 @@ Search the project for:
 
 ## Step 2 - Create UmbracoWebsite Folder
 
-If the `UmbracoWebsite` folder doesn't exist at the project root, create it.
+If the `UmbracoWebsite` folder doesn't exist at the project root, **create the directory** using file system tools.
 
 ---
 
 ## Step 3 - Create maintenance.cshtml
 
-Create a `maintenance.cshtml` file in the `UmbracoWebsite` folder.
+**Write** a `maintenance.cshtml` file in the `UmbracoWebsite` folder.
 
-Ask the user for:
-- Company logo URL
-- Brand colors
-- Custom message text
-- Contact information
-- Background image or design preferences
+**Optional Enhancements**:
 
-Read `assets/maintenance.cshtml` as a template. Customize the HTML with the user's branding preferences and write to `UmbracoWebsite/maintenance.cshtml`.
+Ask the user if they want:
+- **Auto-refresh**: Automatically reload the page when the upgrade is complete (good practice for better UX). See the example in `assets/maintenance.cshtml`.
+- **Multi-domain styling**: Different branding per site for multi-site Umbraco setups. See the example in `assets/maintenance.cshtml`.
 
----
-
-## Step 4 - Optional - Disable Maintenance Page
-
-To disable the maintenance page, update `appsettings.json`:
-
-```json
-{
-  "Umbraco": {
-    "CMS": {
-      "Global": {
-        "ShowMaintenancePageWhenInUpgradeState": false
-      }
-    }
-  }
-}
-```
+**Read** `assets/maintenance.cshtml` as a template and **write** its content to `UmbracoWebsite/maintenance.cshtml`. The template includes auto-refresh functionality and can be extended with multi-domain styling if needed.
 
 ---
 
-## Step 5 - Testing
+## Step 4 - Testing
 
 **Method 1 - Actual upgrade:**
 1. Perform an Umbraco upgrade
@@ -76,10 +57,6 @@ To disable the maintenance page, update `appsettings.json`:
 1. Temporarily modify the Umbraco state to simulate upgrade mode
 2. Navigate to the site - verify the custom maintenance page displays
 3. Revert the simulation after testing
-
-**If disabled:**
-1. Set `ShowMaintenancePageWhenInUpgradeState: false` in appsettings.json
-2. Perform an upgrade - verify normal site access during upgrade
 
 ---
 
@@ -107,5 +84,4 @@ To disable the maintenance page, update `appsettings.json`:
 Tell the user:
 - Custom maintenance page created in `UmbracoWebsite/maintenance.cshtml`
 - Page displays during Umbraco upgrades
-- Backoffice remains accessible during upgrades
 - Works for both self-hosted and Umbraco Cloud deployments
