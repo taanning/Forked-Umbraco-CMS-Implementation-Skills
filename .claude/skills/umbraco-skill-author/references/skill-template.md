@@ -1,7 +1,7 @@
-# Copy-paste scaffold
+# Skill templates
 
-Skeletons for a new skill. Replace every `<Placeholder>`. Delete parts you don't need (a
-single-approach skill may need no `references/` and no `assets/`).
+Skeletons for a new skill. Copy-paste and replace every `<Placeholder>`. Delete parts you don't
+need (a single-approach skill may need no `references/` and no `assets/`).
 
 ## Folder
 

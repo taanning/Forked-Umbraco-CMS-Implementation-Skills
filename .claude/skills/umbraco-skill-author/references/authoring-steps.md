@@ -1,7 +1,7 @@
 # Authoring steps
 
 Follow these when building a new skill. End with the
-[conformance checklist](conformance-checklist.md). A copy-paste scaffold is in
+[conformance checklist](conformance-checklist.md). Copy-paste skeletons are in
 [`skill-template.md`](skill-template.md).
 
 ## Step 1 — Clarify scope
