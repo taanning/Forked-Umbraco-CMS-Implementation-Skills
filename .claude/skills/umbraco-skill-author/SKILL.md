@@ -20,8 +20,7 @@ The shape of every skill: a **thin** SKILL.md that routes, detail in `references
 in `assets/`, deterministic helpers in `scripts/`, and objective assertions in `evals/evals.json`.
 
 **Golden-standard example:** [`umbraco-sitemap`](../../../plugins/implementation/skills/umbraco-sitemap)
-is the reference skill — when in doubt, open it and copy its shape. (It lands with its own PR; until
-then, follow the skeletons in [`templates/skill-template.md`](templates/skill-template.md).)
+is the current reference skill. When in doubt, open it and copy its shape.
 
 ## How to use this
 
