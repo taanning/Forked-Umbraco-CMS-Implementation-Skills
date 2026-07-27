@@ -30,10 +30,13 @@ fix anything that fails. A skill is ready only when every applicable item passes
 - [ ] Templates use `<Placeholder>` tokens with optional/removable lines marked
 - [ ] Template code follows the skill's own best-practices section
 
+**scripts/ (if present)**
+- [ ] Deterministic, repeatable work lives in a script the skill points at, not re-derived in prose
+
 **evals/**
 - [ ] `evals/evals.json` present with realistic, multi-step prompts (one per meaningful scenario)
 - [ ] `expectations[]` are objective/checkable, including a build-honesty expectation
 
 **Before shipping**
-- [ ] Passes `umbraco-skill-validator` and `umbraco-skill-code-analyzer` (if available)
 - [ ] Eval'd against a baseline with `umbraco-skill-evaluator`
+- [ ] _(Planned)_ passes `umbraco-skill-validator` and `umbraco-skill-code-analyzer` once they exist

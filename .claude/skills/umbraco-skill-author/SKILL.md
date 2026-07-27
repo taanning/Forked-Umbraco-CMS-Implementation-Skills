@@ -1,12 +1,14 @@
 ---
 name: umbraco-skill-author
 description: >
-  A framework for building Umbraco skills in this marketplace: how to structure, scaffold, write,
+  A framework for authoring Umbraco skills in THIS marketplace: how to structure, scaffold, write,
   and audit a skill so it matches the house conventions. Use this whenever the user wants to start
-  or build a new skill, e.g. "make a new skill for X", "how should I structure this skill", "turn
-  these docs into a skill", "scaffold a skill", or "get this skill ready to ship". Ends with a
-  self-audit checklist. Hands off to `umbraco-skill-evaluator` for the eval loop.
-  SKIP: non-skill work.
+  or build a new skill for the Umbraco marketplace, e.g. "make a new skill for X", "how should I
+  structure this skill", "turn these docs into a skill", "scaffold a skill", or "get this skill
+  ready to ship". Ends with a self-audit checklist, then hands off to `umbraco-skill-evaluator`
+  for the eval loop — this skill covers authoring, not evaluation.
+  SKIP: non-skill work, and general skill-building unrelated to this Umbraco marketplace (use the
+  generic skill-creator for those).
 ---
 
 # Umbraco Skill Author
@@ -15,10 +17,11 @@ A framework, checklist, and guide for building Umbraco skills. Follow it to go f
 shippable skill that matches the house conventions, then self-audit before handing off.
 
 The shape of every skill: a **thin** SKILL.md that routes, detail in `references/`, code templates
-in `assets/`, and objective assertions in `evals/evals.json`.
+in `assets/`, deterministic helpers in `scripts/`, and objective assertions in `evals/evals.json`.
 
 **Golden-standard example:** [`umbraco-sitemap`](../../../plugins/implementation/skills/umbraco-sitemap)
-is the current reference skill. When in doubt, open it and copy its shape.
+is the reference skill — when in doubt, open it and copy its shape. (It lands with its own PR; until
+then, follow the skeletons in [`references/skill-template.md`](references/skill-template.md).)
 
 ## How to use this
 
@@ -38,8 +41,15 @@ is the current reference skill. When in doubt, open it and copy its shape.
   and tell the agent to fetch them first. Ship verbatim code in `assets/` only when it's genuinely
   not in the docs (and say so).
 - **`.md` doc links.** Fetch-me doc links point at the `.md` page (e.g. `.../composing.md`), or link
-  a sibling skill instead of raw docs (progressive discovery / lazy-loading).
-- **Don't duplicate.** A doc link in a reference file isn't repeated in SKILL.md.
+  a sibling skill instead of raw docs — the `.md` endpoint is what the agent can actually fetch as
+  source, and a sibling-skill link keeps discovery progressive (lazy-loading) rather than dumping
+  everything up front.
+- **Don't duplicate.** A doc link in a reference file isn't repeated in SKILL.md — a fact stated in
+  two places drifts out of sync, and the copy the agent reads is then a coin toss.
+- **Prefer a script over prose for deterministic work.** If a step is a fixed, repeatable operation
+  (scaffolding, validation, a lint check), bundle it in `scripts/` and point at it, rather than
+  asking the agent to re-derive it every run. This is also what lets the conformance checklist be
+  enforced by a deterministic CI check on the PR, not just a self-audit.
 - **Build honesty.** Never claim a verified build you didn't run.
 - **Right place.** content-modelling → `plugins/content-modelling/skills/`; build-out/delivery →
   `plugins/implementation/skills/`; authoring tooling → `.claude/skills/`.
