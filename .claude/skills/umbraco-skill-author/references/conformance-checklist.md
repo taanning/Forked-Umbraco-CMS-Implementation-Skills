@@ -38,5 +38,5 @@ fix anything that fails. A skill is ready only when every applicable item passes
 - [ ] `expectations[]` are objective/checkable, including a build-honesty expectation
 
 **Before shipping**
+- [ ] Passes `umbraco-skill-validator` and `umbraco-skill-code-analyzer` (if available)
 - [ ] Eval'd against a baseline with `umbraco-skill-evaluator`
-- [ ] _(Planned)_ passes `umbraco-skill-validator` and `umbraco-skill-code-analyzer` once they exist

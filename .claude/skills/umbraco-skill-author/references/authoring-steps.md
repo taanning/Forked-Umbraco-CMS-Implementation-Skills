@@ -24,7 +24,8 @@ plugins/<plugin>/skills/<kebab-case-name>/
 ├── references/         # one file per approach (optional if single, trivial approach)
 ├── assets/             # code templates with <Placeholder> tokens (optional)
 ├── scripts/            # deterministic helpers the skill runs (optional)
-└── evals/evals.json    # objective, repeatable validation
+├── evals/evals.json    # objective, repeatable validation
+└── templates/          # copy-paste skeletons for authoring (optional)
 ```
 
 Folder name is kebab-case and must match the `name` in frontmatter.
@@ -74,7 +75,6 @@ Don't paste doc links here that already live in a reference file. Push per-appro
 
 ## Step 7 — Audit and hand off
 
+- Run `umbraco-skill-validator` (links) and `umbraco-skill-code-analyzer` (code) if available.
 - Self-audit against the [conformance checklist](conformance-checklist.md).
 - Hand off to `umbraco-skill-evaluator` to prove value against a baseline; iterate from results.
-- _(Planned — not yet in the repo)_ once `umbraco-skill-validator` (links) and
-  `umbraco-skill-code-analyzer` (code) exist, run them here too. Don't rely on them until they land.
