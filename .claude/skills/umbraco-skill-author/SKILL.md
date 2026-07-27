@@ -21,13 +21,13 @@ in `assets/`, deterministic helpers in `scripts/`, and objective assertions in `
 
 **Golden-standard example:** [`umbraco-sitemap`](../../../plugins/implementation/skills/umbraco-sitemap)
 is the reference skill — when in doubt, open it and copy its shape. (It lands with its own PR; until
-then, follow the skeletons in [`references/skill-template.md`](references/skill-template.md).)
+then, follow the skeletons in [`templates/skill-template.md`](templates/skill-template.md).)
 
 ## How to use this
 
 1. **Build** — walk [`references/authoring-steps.md`](references/authoring-steps.md): scope →
    scaffold → SKILL.md → references → assets → evals. Copy-paste skeletons are in
-   [`references/skill-template.md`](references/skill-template.md).
+   [`templates/skill-template.md`](templates/skill-template.md).
 2. **Audit** — before shipping, self-check against
    [`references/conformance-checklist.md`](references/conformance-checklist.md).
 3. **Hand off** — pass the finished skill to `umbraco-skill-evaluator` to run with-skill vs.
