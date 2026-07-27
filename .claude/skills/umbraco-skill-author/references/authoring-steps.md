@@ -75,6 +75,6 @@ Don't paste doc links here that already live in a reference file. Push per-appro
 
 ## Step 7 — Audit and hand off
 
-- Run `umbraco-skill-validator` (links) and `umbraco-skill-code-analyzer` (code) if available.
+- Run `umbraco-skill-validator` (links) and `umbraco-skill-code-analyzer` (code).
 - Self-audit against the [conformance checklist](conformance-checklist.md).
 - Hand off to `umbraco-skill-evaluator` to prove value against a baseline; iterate from results.
