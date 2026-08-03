@@ -12,7 +12,8 @@
         "The page includes an auto-refresh mechanism (client-side poll that reloads when the site responds normally again), since Umbraco does not reload visitors automatically",
         "The agent references or fetches the official tutorial (docs.umbraco.com/.../create-a-custom-maintenance-page) rather than inventing the mechanism",
         "The agent explains the page appears automatically during upgrade state (pending migrations) and mentions it can be disabled via Umbraco:CMS:Global:ShowMaintenancePageWhenInUpgradeState",
-        "The agent does not conflate this with 404/500/error-page handling"
+        "The agent does not conflate this with 404/500/error-page handling",
+        "If no buildable Umbraco project is available, the agent does not falsely claim to have run a build or upgrade test and explains the appropriate staging verification"
       ]
     },
     {
@@ -26,20 +27,35 @@
         "The agent notes Cloud error pages must be fully self-contained (no external CSS/fonts/JS) and within the ~20 KB size limit, because they're served while the site/app is unavailable",
         "The agent explains these are different layers that both need covering for consistent branding (in-app upgrade state vs platform downtime)",
         "The agent offers a shared/consistent self-contained design that can be reused across both",
-        "If auto-refresh is provided for the Cloud page, the agent notes Cloud does not reload visitors automatically so the page must poll"
+        "If auto-refresh is provided for the Cloud page, the agent notes Cloud does not reload visitors automatically so the page must poll",
+        "If no buildable Umbraco project is available, the agent does not falsely claim to have run a build or Cloud deployment test"
       ]
     },
     {
       "id": 3,
       "prompt": "Can you make our Umbraco 17 maintenance page pull its heading and message from a content node in the backoffice, so our editors can change the wording themselves without a developer?",
-      "expected_output": "The agent explains that the maintenance page renders during upgrade state when the content cache/DB may be unavailable, so reading live from a content node at that moment is unreliable; it keeps the served page a self-contained static file, and if editor control is really wanted, proposes pre-baking the content to the static file ahead of time rather than querying Umbraco live during maintenance.",
+      "expected_output": "The agent explains that the maintenance page renders during upgrade state when the content cache/DB may be unavailable, so reading live from a content node at that moment is unreliable; it keeps the served maintenance page a self-contained static file, and if editor control is really wanted, proposes pre-baking the content to the static file ahead of time rather than querying Umbraco live during maintenance.",
       "files": [],
       "expectations": [
         "The agent explains that during upgrade/maintenance state the content cache or database may be unavailable, so the page cannot reliably query live content (IPublishedContent) at that moment",
         "The agent does NOT produce a maintenance.cshtml that reads the heading/message live from a content node via the content cache at render time as the primary solution",
         "The served maintenance page remains a self-contained static file with no hard dependency on Umbraco being up",
         "If it accommodates editor control at all, it does so by pre-generating/baking the content into the static file ahead of time (e.g. on publish), not by live-querying during maintenance",
-        "The agent is honest about the trade-off rather than just agreeing to the request as asked"
+        "The agent is honest about the trade-off rather than just agreeing to the request as asked",
+        "If no buildable Umbraco project is available, the agent does not falsely claim to have verified the generated page"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Our Umbraco 17 site is on Azure App Service. We do ordinary deployments several times a week and users briefly see a holding page while the app restarts, but we are not running database migrations. We also want a branded page during actual Umbraco upgrades. Tell us which mechanisms cover each case and how to avoid treating a normal restart as an Umbraco maintenance upgrade.",
+      "expected_output": "The agent distinguishes Umbraco upgrade-state maintenance from ordinary app-restart downtime, recommends the static UmbracoWebsite/maintenance.cshtml only for the former, and recommends app_offline.htm, deployment slots, or another hosting-level strategy for the latter. It explains that the same self-contained branding can be reused without claiming the maintenance page handles both cases.",
+      "files": [],
+      "expectations": [
+        "The agent explicitly distinguishes pending Umbraco migrations from ordinary Azure App Service deployment or app-restart downtime",
+        "The agent recommends UmbracoWebsite/maintenance.cshtml for upgrade state and does not present it as the solution for every restart window",
+        "The agent identifies app_offline.htm, deployment slots, or an equivalent Azure hosting-layer mechanism for ordinary deployment downtime",
+        "The agent explains that the same self-contained visual design can be adapted across the runtime and hosting layers",
+        "If no buildable Umbraco project or Azure environment is available, the agent does not falsely claim to have performed a deployment or upgrade test"
       ]
     }
   ]
