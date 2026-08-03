@@ -2,7 +2,7 @@
 
 Follow these when building a new skill. End with the
 [conformance checklist](conformance-checklist.md). Copy-paste skeletons are in
-[`skill-template.md`](skill-template.md).
+[`skill-template.md`](../templates/skill-template.md).
 
 ## Step 1 — Clarify scope
 
@@ -23,7 +23,9 @@ plugins/<plugin>/skills/<kebab-case-name>/
 ├── SKILL.md            # required
 ├── references/         # one file per approach (optional if single, trivial approach)
 ├── assets/             # code templates with <Placeholder> tokens (optional)
-└── evals/evals.json    # objective, repeatable validation
+├── scripts/            # deterministic helpers the skill runs (optional)
+├── evals/evals.json    # objective, repeatable validation
+└── templates/          # copy-paste skeletons for authoring (optional)
 ```
 
 Folder name is kebab-case and must match the `name` in frontmatter.
@@ -68,11 +70,11 @@ Don't paste doc links here that already live in a reference file. Push per-appro
 - One prompt per meaningful scenario: each approach, plus edge cases (headless, MCP-absent, …).
 - `expectations[]` are **objective, checkable assertions** — not "the output is good".
 - Include a **build-honesty** expectation.
-- See the schema in [`skill-template.md`](skill-template.md), and `umbraco-sitemap`'s
+- See the schema in [`skill-template.md`](../templates/skill-template.md), and `umbraco-sitemap`'s
   `evals/evals.json` for a worked example.
 
 ## Step 7 — Audit and hand off
 
-- Run `umbraco-skill-validator` (links) and `umbraco-skill-code-analyzer` (code) if available.
+- Run `umbraco-skill-validator` (links) and `umbraco-skill-code-analyzer` (code).
 - Self-audit against the [conformance checklist](conformance-checklist.md).
 - Hand off to `umbraco-skill-evaluator` to prove value against a baseline; iterate from results.

@@ -10,7 +10,9 @@ plugins/<plugin>/skills/<skill-name>/
 ├── SKILL.md
 ├── references/<approach>.md      # one per approach (optional)
 ├── assets/<File>.cs              # code templates with <Placeholder> tokens (optional)
-└── evals/evals.json
+├── scripts/<helper>.py           # deterministic helpers the skill runs (optional)
+├── evals/evals.json
+└── templates/<skeleton>.md       # copy-paste skeletons for authoring (optional)
 ```
 
 ## SKILL.md skeleton
