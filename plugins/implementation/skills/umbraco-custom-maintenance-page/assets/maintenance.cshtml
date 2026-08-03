@@ -31,8 +31,8 @@
         <noscript><button style="display:inline-block" onclick="location.reload()">Refresh page</button></noscript>
     </div>
     <script>
-        // Optional: replace this health-check URL with a lightweight public endpoint for the site.
-        var checkUrl = window.location.origin + '/';
+        // Umbraco's readiness endpoint is anonymous and bypasses the upgrade view.
+        var checkUrl = window.location.origin + '/umbraco/api/health/ready';
         var MAX_ATTEMPTS = 20;
         var attempt = 0;
 
@@ -44,7 +44,7 @@
 
         function poll() {
             attempt++;
-            fetch(checkUrl + '?_poll=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+            fetch(checkUrl + '?_poll=' + Date.now(), { method: 'GET', cache: 'no-store' })
                 .then(function (response) {
                     if (response.ok) {
                         window.location.reload();
