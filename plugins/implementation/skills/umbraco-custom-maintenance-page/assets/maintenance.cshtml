@@ -14,15 +14,14 @@
         h1{color:var(--umb-dark);font-size:1.75rem;font-weight:700;margin-bottom:0.75rem}
         p{color:var(--umb-gray);font-size:1rem;line-height:1.6;margin-bottom:1.5rem}
         .status-badge{display:inline-flex;align-items:center;gap:8px;background:var(--umb-alert);color:var(--umb-dark);padding:8px 16px;border-radius:20px;font-size:0.875rem;font-weight:600;margin-bottom:1rem}
-        .spinner{width:14px;height:14px;border:2px solid var(--umb-dark);border-bottom-color:transparent;border-radius:50%;animation:spin 1s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
+        .spinner{width:14px;height:14px;border:2px solid var(--umb-dark);border-bottom-color:transparent;border-radius:50%}
         button{display:none;background:var(--umb-dark);color:var(--umb-white);border:0;border-radius:4px;cursor:pointer;padding:0.6rem 1.25rem;font-size:0.9rem}
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>We'll be right back</h1>
-        <p>Performing scheduled updates to improve your experience. Thanks for your patience!</p>
+        <h1><!-- MAINTENANCE_HEADING -->We'll be right back<!-- /MAINTENANCE_HEADING --></h1>
+        <p><!-- MAINTENANCE_MESSAGE -->Performing scheduled updates to improve your experience. Thanks for your patience!<!-- /MAINTENANCE_MESSAGE --></p>
         <div class="status-badge">
             <span class="spinner"></span>
             <span>Checking status&hellip; no need to refresh</span>

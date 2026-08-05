@@ -69,7 +69,26 @@ endpoint unless the project needs one for a separate reason.
 
 Keep the served file self contained. Use inline CSS, no external assets, no layout, and no live
 Umbraco or Razor data such as `IPublishedContent`. The content cache or database may be unavailable
-while the page is being served.
+while the page is being served. In particular, do not make the upgrading view query a backoffice
+content node for its heading or message: this creates a hard dependency on the very services that
+may be unavailable and can turn a useful 503 page into another failure.
+
+### Editor-controlled copy (safe compromise)
+
+Editors can still own the wording, but the copy must be **baked into the deployed view ahead of the
+upgrade**. Create a small backoffice content node (for example, `maintenanceCopy`) with two required
+properties such as `heading` and `message`. A deployment/publish step that runs while the site is
+healthy reads the published values, HTML-encodes them, and replaces explicit tokens in a copy of
+`maintenance.cshtml` (for example, `<!-- MAINTENANCE_HEADING -->` and
+`<!-- MAINTENANCE_MESSAGE -->`). Deploy that generated, self-contained file to the configured
+`UpgradingViewPath` along with the application. Use safe fallback text when either value is missing.
+
+This is not live content rendering: an editor's change takes effect on the next successful
+publish/deployment that regenerates the file. Keep the last known good generated file in the
+artifact; never require a backoffice request, `IPublishedContent`, a scope, or a database connection
+while `RuntimeLevel` is `Upgrading`. See
+[`references/editor-controlled-copy.md`](references/editor-controlled-copy.md) for the workflow and
+trade-offs.
 
 The official documentation warns against keeping a project in upgrade mode longer than necessary.
 Test on staging with a real version upgrade path. Do not claim to have verified the page unless an
