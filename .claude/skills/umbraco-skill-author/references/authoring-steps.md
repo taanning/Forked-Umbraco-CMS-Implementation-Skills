@@ -11,7 +11,10 @@ Pin down before writing anything (ask if ambiguous):
 - **The task** the skill automates, phrased as user goals (these become trigger phrases).
 - **Which plugin** — `content-modelling` vs `implementation`.
 - **One approach or several?** An official-docs way *and* a custom/code way → plan a decision table
-  and one reference file per approach.
+  and one reference file per approach. **Two is the maximum**, and that's a hard rule rather than a
+  style preference: the runtime gate runs one host per approach *kind* (C#/DI on the Clean host,
+  Document Types + templates + config on the starter-kit-free host), so two approaches keep it at two
+  hosts. See [runtime-validation.md](runtime-validation.md).
 - **Version compatibility** — target Umbraco version and any "introduced in vX" APIs.
 - **Backoffice vs file-based** — needs the Umbraco Developer MCP / manual backoffice steps, or pure
   `.cs`/`.cshtml`? This drives the MCP→manual→fallback guidance.
@@ -73,7 +76,20 @@ Don't paste doc links here that already live in a reference file. Push per-appro
 - See the schema in [`skill-template.md`](../templates/skill-template.md), and `umbraco-sitemap`'s
   `evals/evals.json` for a worked example.
 
-## Step 7 — Audit and hand off
+## Step 7 — Add it to the runtime gate (if it ships `assets/*.cs`)
+
+Compiling the skill's own code and asserting its HTTP behaviour catches what evals can't: APIs that
+no longer exist, and output that never renders. Full detail — the `examples/<approach>/` layout, how
+`.generate.json` substitutes placeholders, and how to write a fixture that can actually fail — is in
+[`runtime-validation.md`](runtime-validation.md).
+
+A config-only or backoffice-only approach is NOT automatically exempt any more. If it can be expressed
+as a `package.xml` (Document Types, templates, content) plus a template file, it can ship those as
+assets and be asserted on the starter-kit-free host — that's how umbraco-sitemap's Approach B is
+gated. Skip the gate only when the approach ships nothing at all, and then say so explicitly rather
+than leaving it ambiguous, so nobody assumes coverage that isn't there.
+
+## Step 8 — Audit and hand off
 
 - Run `umbraco-skill-validator` (links) and `umbraco-skill-code-analyzer` (code).
 - Self-audit against the [conformance checklist](conformance-checklist.md).

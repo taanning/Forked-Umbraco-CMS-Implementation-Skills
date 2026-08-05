@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Umbraco_CMS.Skills.TestHost</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers" />
+    <PackageReference Include="NUnit3TestAdapter" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Umbraco-CMS.Skills\Umbraco-CMS.Skills.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Boot/wait mechanics shared with the blank test host — see that project for why these are
+         linked as source rather than referenced as a library. -->
+    <Compile Include="..\TestHost.Shared\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Each skill's tests live next to the example they exercise, but compile into THIS assembly.
+      That's deliberate: Umbraco keeps process-wide static state, so every fixture has to share one
+      host (see ReferenceSiteFixture) — a test project per skill would boot an Umbraco each.
+      So: feature-sliced on disk, single assembly at build time.
+
+      Adding a skill needs no change here. bin/obj are excluded because the SDK copies these files
+      into build output, and compiling those copies would duplicate every fixture.
+
+      *BlankTests.cs is excluded: those exercise the OTHER host (Umbraco-CMS.Skills.Blank, no starter
+      kit) and compile into Umbraco-CMS.Skills.TestHost.Blank instead, so each host gets its own
+      process. Compiling them here would boot two Umbracos in one process.
+    -->
+    <Compile Include="..\plugins\**\examples\*\*Tests.cs"
+             Exclude="..\plugins\**\bin\**;..\plugins\**\obj\**;..\plugins\**\*BlankTests.cs" />
+  </ItemGroup>
+
+</Project>

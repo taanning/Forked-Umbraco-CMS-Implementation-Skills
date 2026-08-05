@@ -2,9 +2,7 @@
 
 > **Experimental Beta:** This project is an exploration of what's possible with Skills for Umbraco. It's evolving as we learn what works best.
 
-A Claude Code plugin marketplace with skills for Umbraco **content modelling** and **implementation**.
-
-> **Status:** Scaffold. The plugin `skills/` folders are empty and ready to be populated.
+A Claude Code plugin marketplace with skills for Umbraco **content modelling** and **implementation**, plus a committed [reference Umbraco instance](#reference-instance) for validating that skill output actually builds and runs.
 
 ## Plugins
 
@@ -78,6 +76,72 @@ Add it as a working directory in Claude Code:
 
 ---
 
+## Reference instance
+
+`Umbraco-CMS.Skills/` (with `Umbraco-CMS.Skills.sln` at the repo root) is a real Umbraco
+**17** web project used to validate that a skill's output actually compiles and serves — the
+runtime counterpart to the LLM-based `umbraco-skill-evaluator`.
+
+- Targets `net10.0`, `Umbraco.Cms 17.*` (matching the skills' "Umbraco 17+" target).
+- Installs **unattended** on first boot into a SQLite database.
+- Ships the **[Clean](https://github.com/prjseal/Clean-Starter-Kit-for-Umbraco-v9)** starter
+  kit, so there is real content (Document Types, templates, published pages) for skill output
+  to run against.
+
+Only the project scaffolding is committed — the runtime SQLite DB and build output are
+`.gitignore`d, and Clean re-installs on first boot.
+
+**How it was scaffolded** (via the [Package Script Writer CLI](https://github.com/prjseal/Package-Script-Writer-CLI), the same tool the backoffice skills use — regenerate with this if you ever need to rebuild it from scratch):
+
+```bash
+dotnet tool install --global PackageScriptWriter.Cli   # if not already installed
+psw --default \
+    -n "Umbraco-CMS.Skills" -s "Umbraco-CMS.Skills" \
+    -k "Clean|7.0.8" \
+    -da \
+    --database-type SQLite \
+    --template-version 17.5.3 \
+    --admin-email admin@example.com --admin-password 1234567890 \
+    --auto-run --build-only
+```
+
+Package versions are managed centrally in `Umbraco-CMS.Skills/Directory.Packages.props`.
+(The committed project also has the launch URL set to `https://localhost:44372`.)
+
+**Run it:**
+
+```bash
+cd Umbraco-CMS.Skills
+dotnet run
+```
+
+Then open the backoffice at **https://localhost:44372/umbraco** and log in with
+**admin@example.com** / **1234567890**.
+
+**Validate a skill against it — deterministically.** Runtime validation is a **`dotnet test`
+gate** (no LLM, reproducible): each validated approach ships an `examples/<approach>/` project that
+compiles the skill's own assets into a reference instance, and a test host boots that instance
+in-process (`WebApplicationFactory`) and asserts the skill's endpoints over HTTP. There are **two**
+instances — one with the Clean starter kit for approaches written as C#, one with no starter kit for
+approaches written as Document Types + templates + config, where Clean would otherwise supply a
+competing implementation of the feature under test.
+
+```bash
+# Two hosts, tested as separate processes (Umbraco keeps process-wide static state).
+dotnet build Umbraco-CMS.Skills.sln
+dotnet test Umbraco-CMS.Skills.TestHost/Umbraco-CMS.Skills.TestHost.csproj --no-build
+dotnet test Umbraco-CMS.Skills.TestHost.Blank/Umbraco-CMS.Skills.TestHost.Blank.csproj --no-build
+
+python3 scripts/generate-examples.py --lint   # every placeholder an asset carries is declared
+```
+
+This runs in CI (`.github/workflows/validate-skills.yml`). For interactive poking or
+backoffice-dependent steps, the `umbraco-reference-instance` authoring skill (in
+`.claude/skills/`) also offers a manual boot/`try` harness. See
+[`.claude/skills/umbraco-reference-instance/SKILL.md`](.claude/skills/umbraco-reference-instance/SKILL.md).
+
+---
+
 ## Project Structure
 
 ```
@@ -86,12 +150,21 @@ Umbraco-CMS-Implementation-Skills/
 ├── plugins/
 │   ├── content-modelling/               # Content modelling plugin
 │   │   ├── .claude-plugin/plugin.json
-│   │   └── skills/                      # Published skills (empty for now)
+│   │   └── skills/                      # Published skills
 │   └── implementation/                  # Implementation plugin
 │       ├── .claude-plugin/plugin.json
-│       └── skills/                      # Published skills (empty for now)
+│       └── skills/<skill>/
+│           ├── SKILL.md, assets/, …      # the skill (assets = the shipped source of truth)
+│           └── examples/<approach>/      # per-approach validation project (generated at build time)
+├── Umbraco-CMS.Skills/                  # Reference instance 1 — Umbraco 17 WITH the Clean starter kit
+├── Umbraco-CMS.Skills.Blank/            # Reference instance 2 — no starter kit (content-shaped approaches)
+├── Umbraco-CMS.Skills.TestHost/         # dotnet test: boots instance 1, HTTP-asserts each skill
+├── Umbraco-CMS.Skills.TestHost.Blank/   # dotnet test: boots instance 2 (own process)
+├── TestHost.Shared/                     # boot/wait/preconditions code linked into both test hosts
+├── Umbraco-CMS.Skills.sln
+├── scripts/generate-examples.py         # projects assets/ into each example at build time
 └── .claude/
-    └── skills/                          # Repo-authoring skills (e.g. skill-creator)
+    └── skills/                          # Repo-authoring skills (evaluator, reference-instance)
 ```
 
 ## Contributing

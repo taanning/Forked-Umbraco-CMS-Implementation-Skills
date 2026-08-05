@@ -1,8 +1,13 @@
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models.PublishedContent;
+using Umbraco.Cms.Core.PublishedCache;
+using Umbraco.Cms.Core.Services.Navigation;
 using Umbraco.Cms.Core.Web;
+using Umbraco.Extensions;
 
 namespace <Namespace>.Controllers;
 
@@ -14,14 +19,19 @@ namespace <Namespace>.Controllers;
 public class ErrorController : Controller
 {
     private readonly IUmbracoContextFactory _umbracoContextFactory;
+    private readonly IDocumentNavigationQueryService _documentNavigationQueryService;
     private readonly ILogger<ErrorController> _logger;
 
     // Replace with your Document Type alias for the 500 error page (e.g., "ErrorPage500")
     private const string ErrorPageAlias = "<ErrorPageAlias>";
 
-    public ErrorController(IUmbracoContextFactory umbracoContextFactory, ILogger<ErrorController> logger)
+    public ErrorController(
+        IUmbracoContextFactory umbracoContextFactory,
+        IDocumentNavigationQueryService documentNavigationQueryService,
+        ILogger<ErrorController> logger)
     {
         _umbracoContextFactory = umbracoContextFactory;
+        _documentNavigationQueryService = documentNavigationQueryService;
         _logger = logger;
     }
 
@@ -44,13 +54,13 @@ public class ErrorController : Controller
             using UmbracoContextReference contextRef = _umbracoContextFactory.EnsureUmbracoContext();
 
             // Navigate: Root → First child with matching Document Type alias
-            // Same approach as 404 finder - works with any root structure
-            IPublishedContent? error500Page = contextRef
-                .UmbracoContext
-                .Content?
-                .GetAtRoot()
-                .FirstOrDefault()
-                ?.FirstChild(ErrorPageAlias);
+            // Same approach as 404 finder - works with any root structure.
+            // FirstChildOfType, not FirstChild: FirstChild's single-string overload takes a
+            // CULTURE, so passing an alias to it silently returns the first child of any type.
+            IPublishedContentCache? contentCache = contextRef.UmbracoContext.Content;
+            IPublishedContent? error500Page = contentCache is null
+                ? null
+                : FirstRoot(contentCache)?.FirstChildOfType(ErrorPageAlias);
 
             if (error500Page != null)
             {
@@ -74,4 +84,11 @@ public class ErrorController : Controller
         Response.StatusCode = StatusCodes.Status500InternalServerError;
         return Content("Internal Server Error. Please try again later.", "text/html");
     }
+
+    // The published content cache has no "get root nodes" method: root keys come from the
+    // document navigation service, and each key is then resolved through the cache.
+    private IPublishedContent? FirstRoot(IPublishedContentCache contentCache) =>
+        _documentNavigationQueryService.TryGetRootKeys(out IEnumerable<Guid> rootKeys)
+            ? rootKeys.Select(contentCache.GetById).FirstOrDefault(root => root is not null)
+            : null;
 }
