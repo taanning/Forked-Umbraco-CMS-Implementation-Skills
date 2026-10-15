@@ -1,0 +1,37 @@
+{
+  "skill_name": "umbraco-dictionary-items",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We've got a traditional Umbraco 17 site (Razor views, ModelsBuilder on) that's going bilingual — Danish and English. The templates are full of hardcoded English labels: 'Read more', 'Search', the footer copyright line, and the 'Category' dropdown on our Product doc type has options like Electronics / Clothing / Books that show up in English on the Danish site. Editors should own all of that text from the backoffice. We have the Umbraco Developer MCP connected. Sort it out — I need the Razor side done properly and I don't want the site to blow up if a translation is missing.",
+      "expected_output": "The agent fetches the official docs, creates (or guides creating) grouped dictionary items via the MCP using dotted keys, renders labels with GetDictionaryValueOrDefault so missing values fall back gracefully, applies the documented multi-value property editor pattern for the dropdown (option keys = dictionary keys, translated with GetDictionaryValue at render time), and does not touch ILocalizationService or build custom infrastructure.",
+      "files": [],
+      "expectations": [
+        "The agent renders the labels in Razor with UmbracoHelper and does NOT build a custom API controller, seeder, or caching layer for this request",
+        "The agent uses the Umbraco Developer MCP (or explicitly states the backoffice steps it would perform) to create the dictionary items rather than inventing a bespoke storage mechanism",
+        "Labels are rendered with @Umbraco.GetDictionaryValueOrDefault(key, fallback) (or GetDictionaryValue with an explicit fallback guard), so a missing translation yields visible fallback text rather than an empty string or an exception",
+        "The dropdown is handled with the documented multi-value property editor pattern: the stored option value is used as (or composed into, e.g. with a 'Site.Category.' prefix) a dictionary key and translated at render time via UmbracoHelper (GetDictionaryValue or GetDictionaryValueOrDefault), rather than hard-coding a translation table in the view",
+        "Dictionary keys are grouped under a parent item with a dotted prefix (e.g. Site.ReadMore) rather than created as unrelated root-level items",
+        "The agent does NOT use ILocalizationService or any obsolete localization API",
+        "Every dictionary call in the written views uses an overload that actually exists on UmbracoHelper: GetDictionaryValue(key), GetDictionaryValue(key, CultureInfo), GetDictionaryValueOrDefault(key, fallback) or GetDictionaryValueOrDefault(key, CultureInfo, fallback). A call shaped like GetDictionaryValue(\"key\", \"fallback\") — a string as the second argument — does not compile and fails this expectation",
+        "The agent changes only the site's own templates/layout; it does NOT add demo or placeholder files to the project (e.g. a partial with sample keys or a deliberately missing key) that the site never renders",
+        "The agent does NOT propose translating the dropdown or labels by making them language-variant content properties (it keeps dictionary items for chrome/labels and variants for content)",
+        "If a real buildable project is available, dotnet build succeeds with no compilation errors; if not, the agent does not falsely claim to have verified a build, but does explicitly state whether it expects the code to compile against the documented APIs it used"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I'm a content editor, not a developer, and we don't have any MCP thing connected. We run two Umbraco 17 sites for two brands and I've just finished entering about 80 dictionary items (grouped under 'Checkout', 'Account' and 'Errors') on brand A in Danish, English and German. I need exactly the same items on brand B, and going forward my Danish-only colleague must be able to edit the Danish values but not accidentally change the English or German ones. Tell me exactly what to click, step by step.",
+      "expected_output": "The agent recognises this is an editorial/backoffice task with no MCP and no developer, fetches the official dictionary-items docs, and walks through: Export... on each group (including descendants) to .udt files, Import... on brand B under the Dictionary tree, and restricting the colleague via Language permissions on their User Group so other languages are read-only. It does not switch to a code-first approach.",
+      "files": [],
+      "expectations": [
+        "The agent notes the Umbraco Developer MCP is not available and proceeds with manual backoffice guidance instead of refusing, stalling, or switching to a code-based solution",
+        "The agent describes exporting from the Translation section via the item/group's ... menu > Export..., including the 'include descendants' choice, producing a .udt file",
+        "The agent describes importing on brand B via the ... menu next to the Dictionary tree > Import..., selecting the .udt file, reviewing the items and choosing where to import them",
+        "The agent explains that per-language edit restriction is done through Language permissions on the colleague's User Group (Users section), which makes the other languages read-only in the dictionary editor",
+        "The steps are given as a numbered click-by-click sequence suitable for a non-developer, and reference the official dictionary-items documentation page as the source",
+        "The agent does NOT tell the editor to write C#, run a migration, or edit configuration files to accomplish this"
+      ]
+    }
+  ]
+}

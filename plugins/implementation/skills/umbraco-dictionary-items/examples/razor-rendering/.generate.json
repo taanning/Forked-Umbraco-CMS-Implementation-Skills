@@ -1,0 +1,11 @@
+{
+  "_comment": "How scripts/generate-examples.mjs builds this example from the skill's assets/. host = which reference site loads it: 'blank' is the Clean-less host, because this is a content-shaped approach (doc type + template + .cshtml rendered at runtime) and Clean ships its own competing content. namespace = the example's identity. assets = the shipped files the example exercises — just the partial; the language, dictionary items, template, doc type and demo page are all created in code by the example's own UmbracoApplicationStarted seeder (ExampleHostWiring.cs), not shipped. requires = content the example needs, asserted by the preconditions fixture: the dictionaryDemo node is created under the shared root by that seeder.",
+  "host": "blank",
+  "namespace": "Umbraco.Skills.Examples.DictionaryItems",
+  "assets": [
+    "_DictionaryLabels.cshtml"
+  ],
+  "requires": {
+    "documentTypeAliasAtRoot": ["dictionaryDemo"]
+  }
+}
