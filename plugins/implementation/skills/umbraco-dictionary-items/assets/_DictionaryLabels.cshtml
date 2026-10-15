@@ -6,12 +6,12 @@
     - In Razor, Umbraco sets CurrentUICulture per request from the matched domain (else the
       default language), so the parameterless overloads already follow the visitor's culture.
     - Always use the OrDefault variant (or a language fallback) where a missing key must not
-      blank the UI — GetDictionaryValue returns "" for an absent key.
-    - CultureDictionary is Umbraco's CACHED dictionary — safe on the render path; never call
+      blank the UI - GetDictionaryValue returns "" for an absent key.
+    - CultureDictionary is Umbraco's CACHED dictionary - safe on the render path; never call
       IDictionaryItemService here.
 
     Multi-value property editors: a Textstring property whose VALUE is a dictionary key lets
-    editors pick a label without typing text — render it with
+    editors pick a label without typing text - render it with
     GetDictionaryValue(Model.Value<string>("myProperty")). See "Translating Multi-Value
     Property Editors" in
     https://docs.umbraco.com/umbraco-cms/develop-with-umbraco/tutorials/multilanguage-setup.md
@@ -20,7 +20,7 @@
 @* Current request culture, with a fallback if the key is missing/untranslated. *@
 <span id="dict-read-more">@Umbraco.GetDictionaryValueOrDefault("Site.ReadMore", "Read more")</span>
 
-@* Explicit culture overload — normally you let the request culture drive this instead. *@
+@* Explicit culture overload - normally you let the request culture drive this instead. *@
 <span id="dict-search-da">@Umbraco.GetDictionaryValue("Site.Search", new CultureInfo("da-DK"))</span>
 
 @* Missing key: falls back instead of rendering "". *@

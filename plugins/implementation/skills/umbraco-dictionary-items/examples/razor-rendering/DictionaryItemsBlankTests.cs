@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace Umbraco_CMS.Skills.TestHost.Blank;
 
 /// <summary>
-/// Deterministic runtime validation of umbraco-dictionary-items — backoffice-managed
+/// Deterministic runtime validation of umbraco-dictionary-items - backoffice-managed
 /// items rendered in Razor via UmbracoHelper.
 ///
 /// Proves the asset the skill ships (assets/_DictionaryLabels.cshtml, seeded as the
@@ -20,7 +20,7 @@ namespace Umbraco_CMS.Skills.TestHost.Blank;
 public class DictionaryItemsBlankTests
 {
     // The node's URL derives from its NAME ("Dictionary Demo"), which the example seeds under the
-    // shared fixture root — see ExampleHostWiring.cs.
+    // shared fixture root - see ExampleHostWiring.cs.
     private const string PageUrl = "/dictionary-demo/";
 
     private static HttpClient Client => BlankSiteFixture.Client;
@@ -33,7 +33,7 @@ public class DictionaryItemsBlankTests
         Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("text/html"),
             "the demo page must be rendered HTML, not an API payload");
 
-        // The template emits a loose HTML document (<!DOCTYPE html> …), which XML can't parse —
+        // The template emits a loose HTML document (<!DOCTYPE html> …), which XML can't parse -
         // strip the doctype and extract the <body> fragment, wrapped so the sibling elements have
         // a single root.
         string body = await response.Content.ReadAsStringAsync();

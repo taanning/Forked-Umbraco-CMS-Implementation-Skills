@@ -14,7 +14,7 @@ using Umbraco.Skills.Examples.Fixtures;
 namespace Umbraco.Skills.Examples.DictionaryItems;
 
 /// <summary>
-/// This example's own harness — not part of the skill.
+/// This example's own harness - not part of the skill.
 ///
 /// Seeds everything the demo page needs at UmbracoApplicationStarted (RuntimeLevel.Run, after
 /// the host is fully up): the da-DK language, the Site dictionary items, the dictionaryDemo
@@ -131,7 +131,7 @@ public class ExampleContentSeeder : INotificationAsyncHandler<UmbracoApplication
     }
 
     /// <summary>
-    /// The demo template's content IS the shipped partial wrapped in a page shell — so a changed
+    /// The demo template's content IS the shipped partial wrapped in a page shell - so a changed
     /// asset propagates on the next boot even though the test database is reused.
     /// </summary>
     private async Task<ITemplate?> EnsureTemplateAsync()

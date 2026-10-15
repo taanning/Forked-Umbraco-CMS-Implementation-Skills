@@ -6,7 +6,7 @@
     Loaded by SITE 2 (Umbraco-CMS.Skills.Blank, no starter kit): the approach is expressed as a
     .cshtml rendered at runtime, so it must not run where Clean's competing content exists.
 
-    Plain Microsoft.NET.Sdk, NOT Sdk.Razor: the cshtml is not compiled into this assembly — the
+    Plain Microsoft.NET.Sdk, NOT Sdk.Razor: the cshtml is not compiled into this assembly - the
     example embeds it and a startup seeder writes it as the dictionaryDemo template's content.
     The skill's assets are generated into obj/ at build time by plugins/Directory.Build.props
     and embedded from there, so what gets seeded IS what the skill ships.
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Static seeding helpers. Referenced as a PROJECT, not linked as source — see the other
+    <!-- Static seeding helpers. Referenced as a PROJECT, not linked as source - see the other
          example projects for why linking produced CS0436 duplicates. -->
     <ProjectReference Include="../../../../../../ExampleFixtures.Shared/ExampleFixtures.Shared.csproj" />
   </ItemGroup>
