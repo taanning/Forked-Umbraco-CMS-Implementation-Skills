@@ -10,8 +10,8 @@ templates via `UmbracoHelper`, which resolves the value for the request's cultur
   `GetDictionaryValueOrDefault(key, altText)`. The `CultureInfo` overloads,
   `Umbraco.CultureDictionary` and `GetChildren(key)` are not on that page; they are covered
   by the overload table and worked example below.
-- [Multilanguage setup tutorial](https://docs.umbraco.com/umbraco-cms/develop-with-umbraco/tutorials/multilanguage-setup.md)
- - read "Using Dictionary Items", "Translating Multi-Value Property Editors", and
+- [Multilanguage setup tutorial](https://docs.umbraco.com/umbraco-cms/develop-with-umbraco/tutorials/multilanguage-setup.md):
+  read "Using Dictionary Items", "Translating Multi-Value Property Editors", and
   "Adding Culture and Hostnames" (how the request culture is resolved).
 
 Do not reproduce the docs' code beyond the one-line call
@@ -34,19 +34,30 @@ compile, because that position is the `CultureInfo`. A fallback always means the
 
 ## Worked example
 
-[`assets/_DictionaryLabels.cshtml`](../assets/_DictionaryLabels.cshtml) is a reference
-view, not a file to add to the user's project: its keys are placeholders and one is
-deliberately missing. Read it, then write the same calls inline in the site's own layout
-and templates where the hard-coded text currently sits. It shows four forms:
+Write the calls inline in the site's own layout and templates, where the hard-coded text
+currently sits - don't add a separate labels partial unless the user asks for one. Any
+view inheriting `UmbracoViewPage` has `Umbraco` available; `System.Globalization` is only
+needed for the explicit-culture overload.
 
-1. `GetDictionaryValueOrDefault(key, fallback)` - request-culture lookup that never
-   renders empty.
-2. `GetDictionaryValue(key, new CultureInfo("da-DK"))` - the explicit-culture overload,
-   for when a fixed language is wanted regardless of the request.
-3. The same `OrDefault` call on a deliberately absent key - what fallback output looks
-   like.
-4. `Umbraco.CultureDictionary.GetChildren("Site")` - every direct child of the `Site`
-   group item for the request culture, rendered as a list.
+```cshtml
+@using System.Globalization
+
+@* 1. Request-culture lookup that never renders empty. *@
+<a href="@Model.Url()">@Umbraco.GetDictionaryValueOrDefault("Site.ReadMore", "Read more")</a>
+
+@* 2. Explicit culture, when a fixed language is wanted regardless of the request. *@
+<span>@Umbraco.GetDictionaryValue("Site.Search", new CultureInfo("da-DK"))</span>
+
+@* 3. Every direct child of the "Site" group, for the request culture. *@
+<ul>
+    @foreach (var label in Umbraco.CultureDictionary.GetChildren("Site"))
+    {
+        <li data-key="@label.Key">@label.Value</li>
+    }
+</ul>
+```
+
+`Site.ReadMore` and `Site.Search` are placeholders for the site's own keys.
 
 ## Multi-value property editors
 
@@ -91,4 +102,5 @@ against the source.
 
 ## Runtime coverage
 
-Asserted on the blank reference host by `examples/razor-rendering/`.
+Documented - this skill ships no code. The four overloads above were checked against
+`UmbracoHelper` in the Umbraco 17.5 source; the snippet is illustrative, not an asset.
