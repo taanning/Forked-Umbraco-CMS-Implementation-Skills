@@ -114,7 +114,7 @@ yarn-error.log*
 .claude/settings.local.json
 
 # Skill evaluator scratch work (always clean up after review)
-/*-workspace/
+**/*-workspace/
 **/__pycache__/
 *.pyc
 
