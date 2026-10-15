@@ -8,8 +8,10 @@ description: >
   calls GetDictionaryValue / GetDictionaryValueOrDefault, wants to translate
   dropdown options, or needs multilingual labels. SKIP: non-Umbraco projects,
   Umbraco < 17, translating *content* properties - that is language variants,
-  not dictionary items - and backoffice extension/localization files, which
-  belong to the backoffice skills.
+  not dictionary items - full multilingual site setup (adding languages,
+  vary-by-culture Document Types, Culture and Hostnames, language switcher),
+  which is `umbraco-multilingual`, and backoffice extension/localization files,
+  which belong to the backoffice skills.
 ---
 
 # Dictionary items
@@ -23,10 +25,10 @@ belongs in a language-variant property on the Document Type.
 
 1. **Decide the keys** using the dotted naming convention: one parent group item
    (e.g. `Site`), children named `Group.Thing` (`Site.ReadMore`,
-   `Site.Footer.Copyright`). Keys are case-sensitive identifiers referenced from
-   code, so treat them like constants; grouping keeps the Translation tree
-   navigable and lets `Umbraco.CultureDictionary.GetChildren("Site")` fetch a
-   whole group in one call.
+   `Site.Footer.Copyright`). Keys are identifiers referenced from code, so treat
+   them like constants and as case-sensitive (the lookup is a database query, so
+   actual sensitivity follows the collation); grouping keeps the Translation tree
+   navigable for editors.
 2. **Create the items** in the Translation section - via the Umbraco Developer
    MCP if available, otherwise by hand following the official
    [Dictionary items guide](https://docs.umbraco.com/umbraco-cms/manage-and-publish-content/publishing-and-workflow/editorial-tools/dictionary-items.md)
@@ -45,25 +47,28 @@ belongs in a language-variant property on the Document Type.
 
 ## Version compatibility
 
-Umbraco 17+. Every API used here (`GetDictionaryValue`, `GetDictionaryValueOrDefault`,
-`CultureDictionary`) exists since Umbraco 13 and is available in any view that
-inherits `UmbracoViewPage`, with or without ModelsBuilder. The older
-`ILocalizationService` is obsolete and must not be used.
+Umbraco 17+. `GetDictionaryValue`, `GetDictionaryValueOrDefault` and
+`CultureDictionary` are available on `Umbraco` in any view that inherits
+`UmbracoViewPage`, with or without ModelsBuilder. The older `ILocalizationService`
+is obsolete and must not be used.
 
 ## Best practices
 
 - **Always have a fallback - with the right overload.** `GetDictionaryValue(key)`
-  returns an empty string for a missing key; use
-  `GetDictionaryValueOrDefault(key, fallback)` (or configured language fallbacks)
-  wherever blank UI is unacceptable. Beware the look-alike:
+  returns an empty string for a missing key or translation; use
+  `GetDictionaryValueOrDefault(key, fallback)` wherever blank UI is unacceptable.
+  It is the only fallback mechanism: a language's configured fallback language
+  applies to content properties, not to dictionary values. Beware the look-alike:
   `GetDictionaryValue(key, "fallback")` reads naturally but does not compile -
   that second parameter is a `CultureInfo`.
-- **Let the request culture drive lookups.** Umbraco sets `CurrentUICulture` per
-  request from the matched domain; use the explicit `CultureInfo` overload only
-  when you deliberately want a fixed culture.
-- **`CultureDictionary` is cached.** It is the safe read path for views - never
-  call `IDictionaryItemService` (the management API) from a view or other hot
-  path.
+- **Let the request culture drive lookups.** On a routed front-end request Umbraco
+  sets `CurrentUICulture` from the matched domain; use the explicit `CultureInfo`
+  overload only when you deliberately want a fixed culture.
+- **Single-key lookups are cached; `GetChildren` is not.** `CultureDictionary[key]`
+  and the `GetDictionaryValue*` calls are the safe read path for views.
+  `CultureDictionary.GetChildren(key)` runs a database query per call and drops
+  children with no translation, so keep it out of templates - and never call
+  `IDictionaryItemService` (the management API) from a view.
 - **Dictionary = chrome, variants = content.** If the text is part of the page's
   editorial content, it is a language variant, not a dictionary item.
 

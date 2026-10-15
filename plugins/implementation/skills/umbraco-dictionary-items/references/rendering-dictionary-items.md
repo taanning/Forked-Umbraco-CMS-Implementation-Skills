@@ -7,19 +7,20 @@ templates via `UmbracoHelper`, which resolves the value for the request's cultur
 
 - [UmbracoHelper: fetching dictionary values](https://docs.umbraco.com/umbraco-cms/develop-with-umbraco/templating-and-rendering/querying/umbracohelper.md#fetching-dictionary-values)
   documents the two basic lookups, `GetDictionaryValue(key)` and
-  `GetDictionaryValueOrDefault(key, altText)`. The `CultureInfo` overloads,
-  `Umbraco.CultureDictionary` and `GetChildren(key)` are not on that page; they are covered
-  by the overload table and worked example below.
+  `GetDictionaryValueOrDefault(key, altText)`. The `CultureInfo` overloads and
+  `Umbraco.CultureDictionary` are not on that page; they are covered below.
 - [Multilanguage setup tutorial](https://docs.umbraco.com/umbraco-cms/develop-with-umbraco/tutorials/multilanguage-setup.md):
   read "Using Dictionary Items", "Translating Multi-Value Property Editors", and
   "Adding Culture and Hostnames" (how the request culture is resolved).
 
-Do not reproduce the docs' code beyond the one-line call
-`@Umbraco.GetDictionaryValue("Site.ReadMore")` - fetch the pages and link instead.
+The calls those pages show (`GetDictionaryValue(key)`, `GetDictionaryValueOrDefault(key,
+altText)`, the multi-value loop) are not repeated here - fetch and link. The sections
+below cover only what the docs leave out.
 
 ## The exact overloads
 
-`UmbracoHelper` has four, and only four, dictionary lookups:
+`UmbracoHelper` has four dictionary *value* lookups (plus `CultureDictionary` and
+`GetCultureDictionary(CultureInfo)`, which return the `ICultureDictionary` behind them):
 
 | Call | Returns when the key/translation is missing |
 | --- | --- |
@@ -30,50 +31,57 @@ Do not reproduce the docs' code beyond the one-line call
 
 There is **no** `GetDictionaryValue(key, "fallback")` - a string second argument does not
 compile, because that position is the `CultureInfo`. A fallback always means the
-`OrDefault` name.
-
-## Worked example
+`OrDefault` name. The `OrDefault` string is also the *only* fallback: a language's
+configured fallback language applies to content properties, not to dictionary values
+(the lookup tries the request culture, then its parent culture, then gives up).
 
 Write the calls inline in the site's own layout and templates, where the hard-coded text
-currently sits - don't add a separate labels partial unless the user asks for one. Any
-view inheriting `UmbracoViewPage` has `Umbraco` available; `System.Globalization` is only
-needed for the explicit-culture overload.
+currently sits - don't add a separate labels partial unless the user asks for one.
+
+## Explicit culture
+
+The one form the docs don't show. Use it when a fixed language is wanted regardless of
+the request, or where there is no routed request to set the culture (see Culture below):
 
 ```cshtml
 @using System.Globalization
-
-@* 1. Request-culture lookup that never renders empty. *@
-<a href="@Model.Url()">@Umbraco.GetDictionaryValueOrDefault("Site.ReadMore", "Read more")</a>
-
-@* 2. Explicit culture, when a fixed language is wanted regardless of the request. *@
-<span>@Umbraco.GetDictionaryValue("Site.Search", new CultureInfo("da-DK"))</span>
-
-@* 3. Every direct child of the "Site" group, for the request culture. *@
-<ul>
-    @foreach (var label in Umbraco.CultureDictionary.GetChildren("Site"))
-    {
-        <li data-key="@label.Key">@label.Value</li>
-    }
-</ul>
+@Umbraco.GetDictionaryValueOrDefault("Site.Search", new CultureInfo("da-DK"), "Search")
 ```
 
-`Site.ReadMore` and `Site.Search` are placeholders for the site's own keys.
+`Umbraco.CultureDictionary.GetChildren(key)` also exists but is **not cached** - it is a
+database query per call and silently omits children with no translation for the
+culture - so don't use it in views.
 
 ## Multi-value property editors
 
-Dropdown/checkbox option *values* can be dictionary keys rather than display text: store
-the key, render it with `GetDictionaryValue(Model.Value<string>("myProperty"))`. Editors
-then translate the option labels without touching the Document Type. Details in the
-"Translating Multi-Value Property Editors" section of the multilanguage tutorial linked
-above.
+Dropdown/checkbox option *values* can be dictionary keys rather than display text, so
+editors translate the option labels without touching the Document Type; the tutorial's
+"Translating Multi-Value Property Editors" section shows the loop. Two things it doesn't
+show:
+
+- The stored value can be empty, and the key parameter is non-nullable - guard it, and
+  fall back to the raw value so an untranslated option still shows something:
+
+  ```cshtml
+  @{ var category = Model.Value<string>("category"); }
+  @if (!string.IsNullOrEmpty(category))
+  {
+      @Umbraco.GetDictionaryValueOrDefault("Site.Category." + category, category)
+  }
+  ```
+
+  With ModelsBuilder on, prefer the typed property (`Model.Category`) over `Value<string>`.
+- Multi-select editors store `IEnumerable<string>`: loop and apply the same guard per item.
 
 ## Culture
 
-In a Razor request, `CurrentUICulture` is set from the domain's Culture & Hostnames
-mapping (else the default language), so the parameterless overloads already follow the
-visitor. Outside a request - API controllers, background work - resolve the culture
-explicitly via `IVariationContextAccessor` or a `CultureInfo` overload; never assume the
-default language.
+On a routed front-end request, `CurrentUICulture` is set from the domain's Culture &
+Hostnames mapping (else the default language), so the parameterless overloads already
+follow the visitor. Anything that does not go through Umbraco's content routing - API
+controllers, surface-less endpoints, background jobs - gets whatever the thread's culture
+happens to be, so pass a `CultureInfo` explicitly there; never assume the default
+language. (If the job also reads content, `umbraco-multilingual` covers setting the
+variation context.)
 
 ## Verify
 
@@ -88,9 +96,9 @@ silence on it is the failure mode to avoid:
 2. **No buildable project:** say so explicitly, and state that every dictionary call
    uses one of the four overloads in the table above, so you expect it to compile.
 
-If a key renders empty at runtime: the item is missing, the key casing differs (keys
-are case-sensitive), or the request culture has no translation and no fallback was
-configured.
+If a key renders empty at runtime: the item is missing, the key casing differs (treat
+keys as case-sensitive; actual sensitivity follows the database collation), or the request
+culture has no translation and no `GetDictionaryValueOrDefault` fallback was given.
 
 ## Done
 
