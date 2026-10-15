@@ -26,7 +26,7 @@ Handler shape and registration are the same as Approach A's assets.
   in the project's composer (see Approach A for where that lives).
 
 The publishing call itself is written into the user's existing service/job, not shipped as an
-asset: it is one line, and the docs page shows it in context.
+asset; Step 2 shows where it belongs.
 
 ## Step 1: Discover project context
 
@@ -57,6 +57,11 @@ scope.Complete();                                                          // wi
 Namespaces: `IEventAggregator` in `Umbraco.Cms.Core.Events`, `ICoreScopeProvider` / `ICoreScope` in
 `Umbraco.Cms.Core.Scoping`.
 
+Await all import work inside the scope before calling `Complete()`; never complete in `finally`
+or use auto-completion when failures must roll back. Nested scopes share the outer notification
+queue: completing an inner scope does not deliver success until the outermost scope also
+completes and is disposed. Do not detach the scope to force early delivery.
+
 Name notifications after the event in past tense (`ImportCompleted`).
 
 ### Letting observers veto: a before/after pair
@@ -71,11 +76,16 @@ Umbraco 17.5; all types in `Umbraco.Cms.Core.Notifications` unless noted):
 - **Publish it before any work** with `_eventAggregator.PublishCancelable(starting)`: returns
   `true` if a handler cancelled (async: `PublishCancelableAsync`). On `true`, abort and log the
   reasons from `starting.Messages.GetAll()`.
+- **Async vetoes:** await the publish before starting the operation. In 17.5.3,
+  `PublishCancelableAsync(starting)` has no cancellation-token parameter. To propagate one,
+  `await _eventAggregator.PublishAsync(starting, cancellationToken)` and then check
+  `starting.Cancel`. Register async veto handlers with `AddNotificationAsyncHandler`.
 - **Carry context to the "completed" notification.** Both `CancelableNotification` and
   `StatefulNotification` expose `IDictionary<string, object?> State`. Handlers can put data in
   the starting notification's `State`; derive the completed notification from
   `StatefulNotification` and copy it over with `completed.WithStateFrom(starting)` (extension in
   `Umbraco.Cms.Core.Notifications`), then publish the completed one as in Step 2.
+  Create the pair per operation; do not keep shared context on handlers or singletons.
 - A plain `INotification` with your own `bool Cancelled` property works but gives consumers a
   different contract from every Umbraco notification; prefer the base classes.
 

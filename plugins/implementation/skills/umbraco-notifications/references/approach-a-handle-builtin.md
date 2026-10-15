@@ -5,10 +5,12 @@ whenever the trigger is something Umbraco does (save, publish, move, delete, sta
 trigger is *your* code and you want others to subscribe to it, use
 [Approach B](approach-b-publish-custom.md).
 
-## Docs: fetch one page, the one for the notification you pick
+## Docs: start with the relevant page
 
-The handler shape and both registration styles are in the shipped assets, so don't fetch anything
-for them. Decide the notification first (Step 2), then fetch only the matching page:
+Use the shipped handler/composer when they fit. For Program.cs, put the same registration in the
+existing builder chain before `Build()`. Choose the notification before fetching documentation;
+start with the matching page below, not every link. Verify further only for a missing API detail
+or a version mismatch.
 
 | Chosen notification | Fetch |
 |---|---|
@@ -19,12 +21,22 @@ for them. Decide the notification first (Step 2), then fetch only the matching p
 | Media, Member, or anything not listed | find it in [Using Notifications](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications.md) (overview + full list) |
 | Async handler details or the `State` dictionary, if the asset comments aren't enough | [Notification Handler](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications/notification-handler.md) |
 
-Don't read the Umbraco source to fill gaps; the facts the docs leave out are here (verified on
-Umbraco 17.5):
+These additional details were checked against Umbraco 17.5.3. Use them before searching source;
+if the installed API differs, verify that specific detail rather than suppressing the check:
 
 - **New entity?** `content.HasIdentity == false` in "-ing"; `((IRememberBeingDirty)content).WasPropertyDirty("Id")` in "-ed".
 - **Cancelled publish:** `IContentService.Publish` returns `PublishResultType.FailedPublishCancelledByEvent`; no `ContentPublishedNotification` and no cache refresh with published cultures follows.
 - **`ContentCacheRefresherNotification` payload:** `MessageObject` is `ContentCacheRefresher.JsonPayload[]`; each item has `Id`, `Key` (`Guid?`), `ChangeTypes` (`TreeChangeTypes` flags), `Blueprint`, `PublishedCultures`, `UnpublishedCultures`. A successful publish arrives as `RefreshNode` (or `RefreshBranch` for a branch publish, one payload for the branch root) with non-empty `PublishedCultures` (`["*"]` for invariant content); saves and cancelled publishes carry none. It runs on every server in a load-balanced setup; gate outbound calls with `IServerRoleAccessor.CurrentServerRole` (`ServerRole.Single` or `SchedulingPublisher`) if they must happen once.
+- **Batch and language checks:** skip unrelated entities with `continue`, not `return`. Check
+  `IsPublishingCulture` before validating a translation. A variant Document Type can still have
+  invariant properties: inspect the property's `PropertyType.VariesByCulture()` and read invariant
+  values without a culture. For success logs, use `HasPublishedCulture`, not `AvailableCultures`.
+- **Cache work has two scopes:** invalidate local entries on every server; apply the server-role
+  guard only to outbound side effects. Role selection prevents duplicate senders, not durable
+  exactly-once delivery. Test `TreeChangeTypes` with bitwise flags, skip unusable payloads with
+  `continue`, and treat `RefreshAll` as local invalidation rather than a publish of everything.
+  Branch payloads describe the root; expand descendants when required. Deduplicate overlapping
+  keys within one delivery, not forever across legitimate republishes.
 
 ## The files
 
@@ -32,6 +44,8 @@ Umbraco 17.5):
   that cancels the publish when a property on a given Document Type breaks a rule. It is
   variant-aware: for a culture-variant type it checks only the cultures actually being published.
   The rule itself is one method (`Violates`) marked for replacement.
+  It assumes the property varies like its Document Type; adapt the lookup as described above
+  when a variant type has an invariant property.
 - `assets/NotificationHandlersComposer.cs`: registers the handler. Add further
   `AddNotificationHandler` / `AddNotificationAsyncHandler` lines here for other notifications.
 
