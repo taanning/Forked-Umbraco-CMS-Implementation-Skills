@@ -64,7 +64,7 @@ public class NotificationHandlersTests
                 "the EventMessage the handler attached should reach the publish result; "
                 + "this is the text an editor would see in the backoffice");
 
-            // The save itself is unaffected by the cancellation: correcting the property and
+            // The earlier Save is unaffected by the cancelled publish: correcting the property and
             // republishing must succeed. The node is reloaded because the cancelled publish left
             // the in-memory instance with PublishedState.Publishing, which Save rejects.
             node = contentService.GetById(node.Id)!;

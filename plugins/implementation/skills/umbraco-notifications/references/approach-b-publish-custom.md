@@ -51,7 +51,7 @@ _eventAggregator.Publish(new ImportStartedNotification(source));          // imm
 using ICoreScope scope = _scopeProvider.CreateCoreScope();                 // Umbraco.Cms.Core.Scoping
 // ... do the work ...
 scope.Notifications.Publish(new ContentImportCompletedNotification(source, count));
-scope.Complete();                                                          // without this: work AND notification are dropped
+scope.Complete();                                                          // no Complete(): the scope rolls back and the queued notification goes with it
 ```
 
 Namespaces: `IEventAggregator` in `Umbraco.Cms.Core.Events`, `ICoreScopeProvider` / `ICoreScope` in
@@ -66,8 +66,8 @@ Name notifications after the event in past tense (`ImportCompleted`).
 
 ### Letting observers veto: a before/after pair
 
-If handlers must be able to stop your operation, model it the way Umbraco does (verified on
-Umbraco 17.5; all types in `Umbraco.Cms.Core.Notifications` unless noted):
+If handlers must be able to stop your operation, model it the way Umbraco does (all types in
+`Umbraco.Cms.Core.Notifications` unless noted):
 
 - **"Starting" notification** derives from `CancelableNotification`. Its constructor needs an
   `EventMessages` (`Umbraco.Cms.Core.Events`); handlers veto with
@@ -76,7 +76,7 @@ Umbraco 17.5; all types in `Umbraco.Cms.Core.Notifications` unless noted):
 - **Publish it before any work** with `_eventAggregator.PublishCancelable(starting)`: returns
   `true` if a handler cancelled (async: `PublishCancelableAsync`). On `true`, abort and log the
   reasons from `starting.Messages.GetAll()`.
-- **Async vetoes:** await the publish before starting the operation. In 17.5.3,
+- **Async vetoes:** await the publish before starting the operation.
   `PublishCancelableAsync(starting)` has no cancellation-token parameter. To propagate one,
   `await _eventAggregator.PublishAsync(starting, cancellationToken)` and then check
   `starting.Cancel`. Register async veto handlers with `AddNotificationAsyncHandler`.

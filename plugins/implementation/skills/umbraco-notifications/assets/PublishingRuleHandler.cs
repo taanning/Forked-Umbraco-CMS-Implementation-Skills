@@ -7,7 +7,7 @@ namespace <Namespace>;
 
 /// <summary>
 /// Cancels a publish when a property on one Document Type breaks a rule. The editor sees the
-/// EventMessage in the backoffice and the publish is rolled back; the save itself still succeeds.
+/// EventMessage in the backoffice and the publish does not happen; their saved draft is kept.
 /// </summary>
 public class PublishingRuleHandler : INotificationHandler<ContentPublishingNotification>
 {

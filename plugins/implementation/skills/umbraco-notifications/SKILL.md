@@ -39,7 +39,8 @@ notification plus a handler for it uses both.
 
 ## Version compatibility
 
-**Umbraco 17+.** No version-specific APIs; the shipped code is tested on 17.
+**Umbraco 17+.** API details in the references were checked against Umbraco 17.5; the shipped
+code is gated on the 17 reference instance.
 
 ## Best practices
 
@@ -48,9 +49,10 @@ notification plus a handler for it uses both.
   run even if the operation fails.
 - **Handlers are created fresh per notification.** Fields don't survive between calls; keep
   state in an injected service. Pass data before-to-after via the notification's `State`.
-- **"Published" is not "in the cache yet".** `ContentPublishedNotification` fires before the
-  published cache updates, so `IPublishedContent` is stale there. Use
-  `ContentCacheRefresherNotification` or read via `IContentService`.
+- **"Published" ran here; "cache refreshed" runs everywhere.** `ContentPublishedNotification`
+  fires once, on the server that published. `ContentCacheRefresherNotification` fires on every
+  server after its own cache has updated, so use it for per-server work (local caches) and for
+  anything that must see the published state on other nodes of a load-balanced site.
 - **Languages change what fires.** Unpublishing one language is a publish of the rest, so it
   arrives as `ContentPublishingNotification`. Use `IsPublishingCulture` / `IsUnpublishingCulture`.
 - **Keep startup handlers quick** (they run every boot; see `umbraco-common-pitfalls`), and

@@ -24,6 +24,5 @@ The cases cover mixed batches/property cultures, local versus distributed cache 
 vetoes with nested transaction boundaries. The skill's committed reference-host tests independently
 prove its shipped assets run; they do not prove every generated answer from these evals runs.
 
-Scores from this revised set are not directly comparable with earlier, easier prompts. One run
-per case measures task-to-task spread, not repeatability. Rerun the same frozen cases to estimate
-run-to-run variation rather than changing tests until a preferred percentage appears.
+One run per case measures task-to-task spread, not repeatability; rerun the same frozen cases to
+estimate run-to-run variation.

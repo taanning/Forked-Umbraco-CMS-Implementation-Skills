@@ -14,29 +14,32 @@ or a version mismatch.
 
 | Chosen notification | Fetch |
 |---|---|
-| A cancel rule on `ContentPublishingNotification` (the shipped asset) | nothing |
-| Any other Content notification, culture helpers, `Suppress()` | [ContentService Notifications](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications/contentservice-notifications.md) |
+| A cancel rule on `ContentPublishingNotification` (the shipped asset), any other Content notification, culture helpers, `Suppress()` | [ContentService Notifications](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications/contentservice-notifications.md) |
 | `ContentCacheRefresherNotification` | [CacheRefresher Notifications](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications/cacherefresher-notifications.md), plus the payload facts below |
 | Startup / shutdown | [Application Lifetime Notifications](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications/umbracoapplicationlifetime-notifications.md) |
 | Media, Member, or anything not listed | find it in [Using Notifications](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications.md) (overview + full list) |
 | Async handler details or the `State` dictionary, if the asset comments aren't enough | [Notification Handler](https://docs.umbraco.com/umbraco-cms/extend-your-project/server-side-extensions/notifications/notification-handler.md) |
 
-These additional details were checked against Umbraco 17.5.3. Use them before searching source;
+These additional details are not on the docs pages. Use them before searching source;
 if the installed API differs, verify that specific detail rather than suppressing the check:
 
 - **New entity?** `content.HasIdentity == false` in "-ing"; `((IRememberBeingDirty)content).WasPropertyDirty("Id")` in "-ed".
-- **Cancelled publish:** `IContentService.Publish` returns `PublishResultType.FailedPublishCancelledByEvent`; no `ContentPublishedNotification` and no cache refresh with published cultures follows.
-- **`ContentCacheRefresherNotification` payload:** `MessageObject` is `ContentCacheRefresher.JsonPayload[]`; each item has `Id`, `Key` (`Guid?`), `ChangeTypes` (`TreeChangeTypes` flags), `Blueprint`, `PublishedCultures`, `UnpublishedCultures`. A successful publish arrives as `RefreshNode` (or `RefreshBranch` for a branch publish, one payload for the branch root) with non-empty `PublishedCultures` (`["*"]` for invariant content); saves and cancelled publishes carry none. It runs on every server in a load-balanced setup; gate outbound calls with `IServerRoleAccessor.CurrentServerRole` (`ServerRole.Single` or `SchedulingPublisher`) if they must happen once.
-- **Batch and language checks:** skip unrelated entities with `continue`, not `return`. Check
+- **Cancelled publish:** `IContentService.Publish` returns `PublishResultType.FailedPublishCancelledByEvent`
+  before it saves anything, so no `ContentPublishedNotification` and no cache refresh follow. (The
+  backoffice's "Save and publish" saves in a separate request first, which is why the editor's
+  draft survives a cancelled publish.)
+- **`ContentCacheRefresherNotification` payload:** `MessageObject` is `ContentCacheRefresher.JsonPayload[]`;
+  each item has `Id`, `Key` (`Guid?`), `ChangeTypes` (`TreeChangeTypes` flags, test with bitwise
+  checks), `Blueprint`, `PublishedCultures`, `UnpublishedCultures`. A successful publish arrives as
+  `RefreshNode` (or `RefreshBranch` for the branch root) with non-empty `PublishedCultures` (`["*"]`
+  for invariant content); saves and cancelled publishes carry none.
+- **Load balancing:** cache refresher notifications run on every server. Local work (invalidating
+  an in-memory cache) belongs on all of them; an outbound side effect that must happen once needs
+  a guard such as `IServerRoleAccessor.CurrentServerRole` being `Single` or `SchedulingPublisher`.
+- **Batches and languages:** skip unrelated entities with `continue`, not `return`. Check
   `IsPublishingCulture` before validating a translation. A variant Document Type can still have
-  invariant properties: inspect the property's `PropertyType.VariesByCulture()` and read invariant
+  invariant properties: check the property's `PropertyType.VariesByCulture()` and read invariant
   values without a culture. For success logs, use `HasPublishedCulture`, not `AvailableCultures`.
-- **Cache work has two scopes:** invalidate local entries on every server; apply the server-role
-  guard only to outbound side effects. Role selection prevents duplicate senders, not durable
-  exactly-once delivery. Test `TreeChangeTypes` with bitwise flags, skip unusable payloads with
-  `continue`, and treat `RefreshAll` as local invalidation rather than a publish of everything.
-  Branch payloads describe the root; expand descendants when required. Deduplicate overlapping
-  keys within one delivery, not forever across legitimate republishes.
 
 ## The files
 
@@ -72,9 +75,10 @@ Ask, in this order:
 
 1. **Veto/alter, or react?** Veto: the "-ing" notification and `CancelOperation`. React:
    the "-ed" one.
-2. **Does the reaction read the published cache (`IPublishedContent`, `UmbracoHelper`)?** Then
-   handle `ContentCacheRefresherNotification`. The "-ed" notification fires before the cache
-   has updated, so reading `IPublishedContent` there returns the previous state.
+2. **Does the reaction read the published cache (`IPublishedContent`, `UmbracoHelper`), or must
+   it run on every server?** Then handle `ContentCacheRefresherNotification`: it is raised on each
+   server when that server's cache has been refreshed, whereas the "-ed" notification runs only
+   where the publish happened. The cache-refresher page documents this.
 3. **Multilingual site?** Use `IsPublishingCulture` / `IsSavingCulture` / `HasPublishedCulture`
    etc. from the ContentService page. Remember a single-culture unpublish arrives as a
    *Publishing* notification (`IsUnpublishingCulture`), not an Unpublishing one.
@@ -91,8 +95,9 @@ Substitute in the assets:
 
 - `<Namespace>`: the project's root namespace.
 - `<DocTypeAlias>` / `<PropertyAlias>`: the confirmed aliases.
-- Replace the body of `Violates` with the real rule; keep the `EventMessage` user-facing, since it
-  is shown to the editor in the backoffice.
+- Replace the body of `Violates` with the real rule **and** the `EventMessage` text, which
+  describes the shipped upper-case rule; keep it user-facing, since the editor sees it in the
+  backoffice.
 
 Then, if a real `.csproj` exists, run `dotnet build` and fix compile errors before finishing. If
 no buildable project exists, say so explicitly and state which documented APIs the code targets.
@@ -104,9 +109,9 @@ Tell the user:
 
 - Which notification(s) are handled and why that half of the pair was chosen.
 - Where the handler and its registration live, and how to add more handlers.
-- For a cancel rule: that the editor sees the `EventMessage` text as a backoffice notification
-  and the publish is rolled back; the save itself still succeeds.
-- Any caveat that applies: cache timing, culture behaviour, startup cost.
+- For a cancel rule: that the editor sees the `EventMessage` text as a backoffice notification,
+  the publish does not happen, and the draft they saved is kept.
+- Any caveat that applies: load-balanced delivery, culture behaviour, startup cost.
 
 ## Runtime coverage
 

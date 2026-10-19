@@ -28,7 +28,7 @@
         "evals/files/Contracts.cs"
       ],
       "expectations": [
-        "The implementation reads final product data after ContentCacheRefresherNotification, or uses an equivalent explicitly justified freshness-safe path. It explains why reading the URL immediately in ContentPublishedNotification is unsafe.",
+        "The implementation handles ContentCacheRefresherNotification (not only ContentPublishedNotification) and explains why: it is raised on every server after that server's cache has refreshed, whereas ContentPublishedNotification runs only on the server that published, so a per-server local cache cannot be kept correct from it.",
         "Payload handling uses flag-aware tests for TreeChangeTypes rather than equality with one flag. Unsupported or missing-key entries are skipped individually, so a later valid payload is still processed.",
         "Local invalidation runs on every server, including Subscriber/Unknown roles as appropriate for local reads, and handles node, branch, removal and RefreshAll changes. The outbound role/publish filters do not suppress local invalidation; RefreshAll never causes catalogue upserts.",
         "Outbound upserts are limited to actual publish payloads with non-empty PublishedCultures (or equivalent evidence), exclude blueprints and removal-only changes, and use IServerRoleAccessor Single/SchedulingPublisher or an equivalent single-sender mechanism. The explanation does not claim this provides durable exactly-once delivery.",
