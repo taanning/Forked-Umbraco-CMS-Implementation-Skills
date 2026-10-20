@@ -32,8 +32,10 @@ below cover only what the docs leave out.
 There is **no** `GetDictionaryValue(key, "fallback")` - a string second argument does not
 compile, because that position is the `CultureInfo`. A fallback always means the
 `OrDefault` name. The `OrDefault` string is also the *only* fallback: a language's
-configured fallback language applies to content properties, not to dictionary values
-(the lookup tries the request culture, then its parent culture, then gives up).
+configured fallback language applies to content properties, not to dictionary values.
+The lookup picks one installed language - the one matching the request culture, or its
+parent culture (`da` for `da-DK`) only when no language matches exactly - and returns
+that language's translation or `""`; it never tries a second language.
 
 Write the calls inline in the site's own layout and templates, where the hard-coded text
 currently sits - don't add a separate labels partial unless the user asks for one.
@@ -97,8 +99,9 @@ silence on it is the failure mode to avoid:
    uses one of the four overloads in the table above, so you expect it to compile.
 
 If a key renders empty at runtime: the item is missing, the key casing differs (treat
-keys as case-sensitive; actual sensitivity follows the database collation), or the request
-culture has no translation and no `GetDictionaryValueOrDefault` fallback was given.
+keys as case-sensitive; on a cache miss, actual sensitivity follows the database
+collation), or the request culture has no translation and no
+`GetDictionaryValueOrDefault` fallback was given.
 
 ## Done
 

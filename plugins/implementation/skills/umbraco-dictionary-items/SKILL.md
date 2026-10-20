@@ -26,9 +26,9 @@ belongs in a language-variant property on the Document Type.
 1. **Decide the keys** using the dotted naming convention: one parent group item
    (e.g. `Site`), children named `Group.Thing` (`Site.ReadMore`,
    `Site.Footer.Copyright`). Keys are identifiers referenced from code, so treat
-   them like constants and as case-sensitive (the lookup is a database query, so
-   actual sensitivity follows the collation); grouping keeps the Translation tree
-   navigable for editors.
+   them like constants and as case-sensitive (a cache miss goes to the database,
+   so actual sensitivity follows the collation); grouping keeps the Translation
+   tree navigable for editors.
 2. **Create the items** in the Translation section - via the Umbraco Developer
    MCP if available, otherwise by hand following the official
    [Dictionary items guide](https://docs.umbraco.com/umbraco-cms/manage-and-publish-content/publishing-and-workflow/editorial-tools/dictionary-items.md)
@@ -38,9 +38,10 @@ belongs in a language-variant property on the Document Type.
    walk the user through its steps dialog by dialog - on import, for example,
    reviewing the items and choosing where they go - and link the guide in your
    answer.
-3. **Render them** - follow the
-   [rendering reference](references/rendering-dictionary-items.md): the exact
-   lookup overloads, a worked example, and culture handling.
+3. **Render them** - open the
+   [rendering reference](references/rendering-dictionary-items.md) before writing
+   any view code: the exact lookup overloads, the explicit-culture form, null-safe
+   multi-value rendering, and culture handling.
 4. **Verify, then report** - finish with the reference's Verify and Done
    sections. Don't skip the build check; see the first best practice below for
    why "it looks right" is not evidence.
@@ -74,5 +75,9 @@ is obsolete and must not be used.
 
 ## Validation
 
-Assertions live in [`evals/evals.json`](evals/evals.json); run them with the
-`umbraco-skill-evaluator` skill.
+Documented - this skill ships no code and nothing ran: the Razor snippets in the
+reference are illustrative and uncompiled, and the
+[Multilanguage setup tutorial](references/rendering-dictionary-items.md#fetch-these-first)
+is the source for the real thing. Assertions live in
+[`evals/evals.json`](evals/evals.json); run them with the `umbraco-skill-evaluator`
+skill.
