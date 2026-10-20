@@ -3,6 +3,17 @@
 Dictionary items are created in the backoffice (Translation > Dictionary) and read in
 templates via `UmbracoHelper`, which resolves the value for the request's culture.
 
+## Contents
+
+- [Fetch these first](#fetch-these-first): read when you need the docs pages to follow for the basic lookups and the request culture.
+- [The exact overloads](#the-exact-overloads): read when writing a lookup call, to pick the right overload and fallback behaviour.
+- [Explicit culture](#explicit-culture): read when a fixed language is wanted, or there is no routed request to set the culture.
+- [Multi-value property editors](#multi-value-property-editors): read when dropdown or checkbox option values are dictionary keys that need translating.
+- [Culture](#culture): read when the code runs outside normal front-end routing (API controllers, background jobs) or you need to know how the culture is set.
+- [Verify](#verify): read before the final answer, to state build correctness and troubleshoot a key that renders empty.
+- [Done](#done): read when wrapping up, for what to tell the user.
+- [Runtime coverage](#runtime-coverage): read when you need to know what was checked against the Umbraco source.
+
 ## Fetch these first
 
 - [UmbracoHelper: fetching dictionary values](https://docs.umbraco.com/umbraco-cms/develop-with-umbraco/templating-and-rendering/querying/umbracohelper.md#fetching-dictionary-values)
