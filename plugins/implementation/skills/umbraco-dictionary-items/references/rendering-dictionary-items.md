@@ -117,5 +117,7 @@ against the source.
 
 ## Runtime coverage
 
-Documented - this skill ships no code. The four overloads above were checked against
-`UmbracoHelper` in the Umbraco 17.5 source; the snippet is illustrative, not an asset.
+Documented - this skill ships no code. The four overloads, the `""` on a miss, the
+single-language lookup (no configured-fallback step) and the uncached `GetChildren` were
+checked against `UmbracoHelper` and `DefaultCultureDictionary` in the Umbraco 17.5.3
+source; the snippets are illustrative, not assets.
