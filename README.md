@@ -45,6 +45,7 @@ workflow; the others link into them.
 | `umbraco-custom-maintenance-page` | Customises the page visitors see while Umbraco runs upgrade migrations |
 | `umbraco-common-pitfalls` | Reference guide to anti-patterns, performance traps and common mistakes |
 | `umbraco-templating` | Templates, partial views, view components, route hijacking and surface-controller forms, with runtime-tested code |
+| `umbraco-notifications` | Runs server-side code when Umbraco saves, publishes or deletes content, or raises your own notification, with runtime-tested handlers |
 
 ## Quick Start
 

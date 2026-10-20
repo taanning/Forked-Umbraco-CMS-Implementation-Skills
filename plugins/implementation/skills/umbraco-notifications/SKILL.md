@@ -31,6 +31,10 @@ media save/delete), built-in
 | Shipped code | `assets/PublishingRuleHandler.cs`, `assets/NotificationHandlersComposer.cs` | `assets/ContentImportCompletedNotification.cs`, `assets/ContentImportCompletedHandler.cs` |
 | Best for | Reacting to or vetoing what Umbraco does | Letting other code react to what your service/job does |
 
+**Before writing any code, open the reference for the approach you choose and start from its
+assets.** The facts the docs pages leave out (cache-refresher payloads, cancelled publishes,
+scope delivery) are only there.
+
 ### How to decide
 
 "When Umbraco does X, do Y" is A, which is nearly everything. Pick B when the event is your own
@@ -45,8 +49,8 @@ code is gated on the 17 reference instance.
 ## Best practices
 
 - **Right half of the pair.** Veto or alter in the "before" notification (`CancelOperation`);
-  do side effects in the "after" one. Cancelling in "after" is a no-op, and "before" side effects
-  run even if the operation fails.
+  do side effects in the "after" one. "After" notifications can't be cancelled (they have no
+  `CancelOperation`), and "before" side effects run even if the operation fails.
 - **Handlers are created fresh per notification.** Fields don't survive between calls; keep
   state in an injected service. Pass data before-to-after via the notification's `State`.
 - **"Published" ran here; "cache refreshed" runs everywhere.** `ContentPublishedNotification`
@@ -56,7 +60,8 @@ code is gated on the 17 reference instance.
 - **Languages change what fires.** Unpublishing one language is a publish of the rest, so it
   arrives as `ContentPublishingNotification`. Use `IsPublishingCulture` / `IsUnpublishingCulture`.
 - **Keep startup handlers quick** (they run every boot; see `umbraco-common-pitfalls`), and
-  check `IsRestarting` or `IRuntimeState.Level` so install-time work doesn't run twice.
+  gate them on `IRuntimeState.Level == RuntimeLevel.Run`: they also fire during install and upgrade
+  boots. `umbraco-composing` covers startup work and runtime levels in full.
 - **Register the way the project already does:** existing `IComposer`s, or the
   `CreateUmbracoBuilder()` chain in `Program.cs`. If neither, a composer.
 

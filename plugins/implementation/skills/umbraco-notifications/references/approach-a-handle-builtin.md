@@ -31,7 +31,8 @@ if the installed API differs, verify that specific detail rather than suppressin
 - **`ContentCacheRefresherNotification` payload:** `MessageObject` is `ContentCacheRefresher.JsonPayload[]`;
   each item has `Id`, `Key` (`Guid?`), `ChangeTypes` (`TreeChangeTypes` flags, test with bitwise
   checks), `Blueprint`, `PublishedCultures`, `UnpublishedCultures`. A successful publish arrives as
-  `RefreshNode` (or `RefreshBranch` for the branch root) with non-empty `PublishedCultures` (`["*"]`
+  `RefreshNode`, or `RefreshBranch` for a branch publish or a node's first publish (its descendants
+  come back with it), with non-empty `PublishedCultures` (`["*"]`
   for invariant content); saves and cancelled publishes carry none.
 - **Load balancing:** cache refresher notifications run on every server. Local work (invalidating
   an in-memory cache) belongs on all of them; an outbound side effect that must happen once needs
@@ -82,9 +83,14 @@ Ask, in this order:
 3. **Multilingual site?** Use `IsPublishingCulture` / `IsSavingCulture` / `HasPublishedCulture`
    etc. from the ContentService page. Remember a single-culture unpublish arrives as a
    *Publishing* notification (`IsUnpublishingCulture`), not an Unpublishing one.
-4. **Startup work?** `UmbracoApplicationStartedNotification`, guarded by `IsRestarting` (and
-   `IRuntimeState.Level == RuntimeLevel.Run` if it must not run during install/upgrade). Keep it
-   light; see `umbraco-common-pitfalls`.
+4. **Startup work?** `UmbracoApplicationStartedNotification`, guarded by an injected
+   `IRuntimeState.Level == RuntimeLevel.Run` (the notification carries no level, and it also fires
+   on the first boot of an install). `IsRestarting` alone is the wrong guard: it lets the work run
+   on that install boot and skips the in-process restart where an attended install or upgrade first
+   reaches `Run`. Add it only if the work must not repeat after that restart. Keep it light; see
+   `umbraco-common-pitfalls`, and
+   [`umbraco-composing`](../../umbraco-composing/references/startup-and-runtime-levels.md) for
+   components and the other runtime levels.
 5. **Bulk import/migration that itself saves content?** Wrap it in a scope and call
    `scope.Notifications.Suppress()` only if you understand it also skips cache and index
    updates (the ContentService page explains the trade-off).
