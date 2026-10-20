@@ -5,6 +5,16 @@ whenever the trigger is something Umbraco does (save, publish, move, delete, sta
 trigger is *your* code and you want others to subscribe to it, use
 [Approach B](approach-b-publish-custom.md).
 
+## Contents
+
+- [Docs: start with the relevant page](#docs-start-with-the-relevant-page): read when you have chosen a notification and need the one docs page to fetch, or the payload, load-balancing, culture and cancelled-publish facts the docs omit.
+- [The files](#the-files): read when you want the shipped handler and composer, or the shape to copy for another notification (sync or async).
+- [Step 1: Discover project context](#step-1-discover-project-context): read when starting, to find the namespace, Umbraco version and how handlers are already registered.
+- [Step 2: Decide which notification](#step-2-decide-which-notification): read when choosing between the "-ing", "-ed" and cache refresher notifications, or handling multilingual, startup or bulk-import cases.
+- [Step 3: Write the files](#step-3-write-the-files): read when substituting placeholders in the assets and building.
+- [Done](#done): read when wrapping up, for what to tell the user.
+- [Runtime coverage](#runtime-coverage): read when you need to know what the reference host actually proves for this approach.
+
 ## Docs: start with the relevant page
 
 Use the shipped handler/composer when they fit. For Program.cs, put the same registration in the

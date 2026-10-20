@@ -6,6 +6,16 @@ this when the trigger is something *you* do; if the trigger is an Umbraco operat
 [Approach A](approach-a-handle-builtin.md). Handling your own notification uses Approach A's
 handler shape unchanged.
 
+## Contents
+
+- [Docs: usually nothing to fetch](#docs-usually-nothing-to-fetch): read when deciding whether any docs page is needed, for example before writing a recurring job from scratch.
+- [The files](#the-files): read when you want the shipped notification and handler assets and where the publish call goes.
+- [Step 1: Discover project context](#step-1-discover-project-context): read when starting, to find the namespace, registration style and the code that triggers the operation.
+- [Step 2: Decide how to publish](#step-2-decide-how-to-publish): read when choosing between publishing inside a scope or immediately, or when letting observers veto with a before/after pair, async vetoes or carried state.
+- [Step 3: Write the files](#step-3-write-the-files): read when writing the notification, the publish call and the registration, then building.
+- [Done](#done): read when wrapping up, for what to tell the user.
+- [Runtime coverage](#runtime-coverage): read when you need to know what the reference host actually proves for this approach.
+
 ## Docs: usually nothing to fetch
 
 The notification class and handler are shipped as assets, the publish call is in Step 2, and the
