@@ -83,8 +83,11 @@ Hostnames mapping (else the default language), so the parameterless overloads al
 follow the visitor. Anything that does not go through Umbraco's content routing - API
 controllers, surface-less endpoints, background jobs - gets whatever the thread's culture
 happens to be, so pass a `CultureInfo` explicitly there; never assume the default
-language. (If the job also reads content, `umbraco-multilingual` covers setting the
-variation context.)
+language. With no `UmbracoHelper` (a hosted service, say), inject
+`ICultureDictionaryFactory` and call `CreateDictionary(culture)`, then index it by key;
+don't swap `CultureInfo.CurrentUICulture` around a parameterless `CreateDictionary()`.
+(If the job also reads content, `umbraco-multilingual` covers setting the variation
+context.)
 
 ## Verify
 
