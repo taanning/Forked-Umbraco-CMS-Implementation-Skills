@@ -26,9 +26,9 @@ belongs in a language-variant property on the Document Type.
 1. **Decide the keys** using the dotted naming convention: one parent group item
    (e.g. `Site`), children named `Group.Thing` (`Site.ReadMore`,
    `Site.Footer.Copyright`). Keys are identifiers referenced from code, so treat
-   them like constants and as case-sensitive (a cache miss goes to the database,
-   so actual sensitivity follows the collation); grouping keeps the Translation
-   tree navigable for editors.
+   them like constants and keep one casing; lookups are case-insensitive on
+   Umbraco's default databases, but don't rely on that across environments.
+   Grouping keeps the Translation tree navigable for editors.
 2. **Create the items** in the Translation section - via the Umbraco Developer
    MCP if available, otherwise by hand following the official
    [Dictionary items guide](https://docs.umbraco.com/umbraco-cms/manage-and-publish-content/publishing-and-workflow/editorial-tools/dictionary-items.md)

@@ -61,8 +61,9 @@ editors translate the option labels without touching the Document Type; the tuto
 "Translating Multi-Value Property Editors" section shows the loop. Two things it doesn't
 show:
 
-- The stored value can be empty, and the key parameter is non-nullable - guard it, and
-  fall back to the raw value so an untranslated option still shows something:
+- The stored value can be empty, and the key parameter is non-nullable. A null or empty
+  key doesn't throw, it just renders `""` - so guard it, and fall back to the raw value
+  so an untranslated option still shows something:
 
   ```cshtml
   @{ var category = Model.Value<string>("category"); }
@@ -98,9 +99,9 @@ silence on it is the failure mode to avoid:
 2. **No buildable project:** say so explicitly, and state that every dictionary call
    uses one of the four overloads in the table above, so you expect it to compile.
 
-If a key renders empty at runtime: the item is missing, the key casing differs (treat
-keys as case-sensitive; on a cache miss, actual sensitivity follows the database
-collation), or the request culture has no translation and no
+If a key renders empty at runtime: the item is missing (check the spelling; casing
+rarely matters, since lookups are case-insensitive on SQLite and default SQL Server
+collations), or the request culture has no translation and no
 `GetDictionaryValueOrDefault` fallback was given.
 
 ## Done
