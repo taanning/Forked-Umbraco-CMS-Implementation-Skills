@@ -113,7 +113,8 @@ Never imply a build you didn't run.
 
 Tell the user:
 
-- Which notification(s) are handled and why that half of the pair was chosen.
+- Which notification(s) are handled and why: that half of the pair, or the cache refresher over
+  the "-ed" notification (it runs on every server, after that server's cache has refreshed).
 - Where the handler and its registration live, and how to add more handlers.
 - For a cancel rule: that the editor sees the `EventMessage` text as a backoffice notification,
   the publish does not happen, and the draft they saved is kept.
